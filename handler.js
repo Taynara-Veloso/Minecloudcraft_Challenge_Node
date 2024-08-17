@@ -1,4 +1,5 @@
 import AWS from "aws-sdk";
+import uuid from "uuid";
 import express from "express";
 import serverless from "serverless-http";
 
@@ -35,6 +36,34 @@ app.get("/sessions", async (req, res) => {
   }
 });
 
+app.post("/sessions", async (req, res) => {
+  const sessionId = uuid.v4();
+  const { hostname, players, gamemap, gamemode } = req.body;
+
+  const params = {
+    TableName: GAMESESSION_TABLE,
+    Item: {
+      sessionId,
+      hostname,
+      players,
+      gamemap,
+      gamemode,
+    },
+  };
+
+  try {
+    await dynamoDbClient.put(params).promise();
+    return res
+      .status(404)
+      .json({ message: 'Game session created successfully'});
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ error: 'Error creating game session', error });
+  }
+});
+
 app.use((res) => {
   return res.status(404).json({
     error: "Not Found",
@@ -42,4 +71,3 @@ app.use((res) => {
 });
 
 export const handler = serverless(app);
-
