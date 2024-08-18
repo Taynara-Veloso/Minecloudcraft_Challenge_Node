@@ -1,5 +1,5 @@
 import AWS from "aws-sdk";
-import uuid from "uuid";
+import { v4 as uuid } from "uuid";
 import express from "express";
 import serverless from "serverless-http";
 
@@ -10,11 +10,11 @@ const GAMESESSION_TABLE = process.env.GAMESESSION_TABLE;
 
 app.use(express.json());
 
-app.get("/sessions", async (req, res) => {
+app.get("/sessions/:sessionId", async (request, response) => {
   const params = {
     TableName: GAMESESSION_TABLE,
     Key: {
-      sessionId: req.params.sessionId,
+      sessionId: request.params.sessionId,
     },
   };
 
@@ -22,23 +22,23 @@ app.get("/sessions", async (req, res) => {
     const { Item } = await dynamoDbClient.get(params).promise();
     if (Item) {
       const { sessionId, hostname, players, gamemap, gamemode } = Item;
-      return res.json({ sessionId, hostname, players, gamemap, gamemode });
+      return response.json({ sessionId, hostname, players, gamemap, gamemode });
     } else {
-      return res
+      return response
         .status(404)
         .json({ error: 'Could not find user with provided "sessionId"' });
     }
   } catch (error) {
     console.log(error);
-    return res
+    return response
       .status(500)
-      .json({ error: "Could not retreive session" });
+      .json({ error: "Could not retrieve session" });
   }
 });
 
-app.post("/sessions", async (req, res) => {
+app.post("/sessions", async (request, response) => {
   const sessionId = uuid.v4();
-  const { hostname, players, gamemap, gamemode } = req.body;
+  const { hostname, players, gamemap, gamemode } = request.body;
 
   const params = {
     TableName: GAMESESSION_TABLE,
@@ -53,19 +53,19 @@ app.post("/sessions", async (req, res) => {
 
   try {
     await dynamoDbClient.put(params).promise();
-    return res
-      .status(404)
+    return response
+      .status(201)
       .json({ message: 'Game session created successfully'});
   } catch (error) {
     console.log(error);
-    return res
+    return response
       .status(500)
       .json({ error: 'Error creating game session', error });
   }
 });
 
-app.use((res) => {
-  return res.status(404).json({
+app.use((request, response) => {
+  return response.status(404).json({
     error: "Not Found",
   });
 });
