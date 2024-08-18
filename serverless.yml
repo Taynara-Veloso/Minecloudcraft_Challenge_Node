@@ -1,28 +1,18 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
-Description: 'Serverless application for creating game sessions.'
-
 org: taynaravelosoproject
 app: challenge-fullstack
-service: serverless-game-sessions
+service: serverless-game-sessions-new
 frameworkVersion: "4"
-
-Globals:
-  Function:
-    Timeout: 10
-
-plugins:
-  - serverless-esbuild
 
 custom:
   tableName: "sessions-table-${sls:stage}"
-  esbuild:
-    bundle: true
-    minify: false
 
 provider:
   name: aws
+  region: us-east-1
+  deploymentBucket:
+    name: gamesessionbucket
   runtime: nodejs20.x
+  profile: default
   iam:
     role:
       statements:
@@ -34,8 +24,23 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
+            - apigateway:POST
+            - apigateway:PUT
+            - apigateway:GET
+            - apigateway:DELETE
+            - apigateway:PATCH
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - iam:CreateRole
+            - iam:AttachRolePolicy
+            - iam:PutRolePolicy
+            - iam:TagRole
+            - iam:GetRole
+            - iam:ListAttachedRolePolicies
           Resource:
-            - Fn::GetAtt: [GameSessionTable, Arn]
+            - "*"
+            - Fn::GetAtt: [GameSessionsTable, Arn]
   environment:
     DYNAMODB_TABLE: ${self:custom.tableName}
 
@@ -50,7 +55,6 @@ resources:
     GameSessionsTable:
         Type: 'AWS::DynamoDB::Table'
         Properties:
-          TableName: 'GameSessions'
           AttributeDefinitions:
             - AttributeName: 'sessionId'
               AttributeType: 'S'
