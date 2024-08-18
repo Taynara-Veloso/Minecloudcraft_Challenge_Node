@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'Serverless application for creating game sessions.'
+
+org: taynaravelosoproject
+app: challenge-fullstack
+service: serverless-game-sessions
+frameworkVersion: "4"
+
+Globals:
+  Function:
+    Timeout: 10
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  tableName: "sessions-table-${sls:stage}"
+  esbuild:
+    bundle: true
+    minify: false
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [GameSessionTable, Arn]
+  environment:
+    DYNAMODB_TABLE: ${self:custom.tableName}
+
+functions:
+  GameSession:
+    handler: handler.handler
+    events:
+      - httpApi: "*"
+
+resources:
+  Resources:
+    GameSessionsTable:
+        Type: 'AWS::DynamoDB::Table'
+        Properties:
+          TableName: 'GameSessions'
+          AttributeDefinitions:
+            - AttributeName: 'sessionId'
+              AttributeType: 'S'
+          KeySchema:
+            - AttributeName: 'sessionId'
+              KeyType: 'HASH'
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+          BillingMode: PAY_PER_REQUEST
+          TableName: ${self:custom.tableName}
