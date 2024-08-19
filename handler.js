@@ -1,5 +1,5 @@
 import AWS from "aws-sdk";
-import { v4 as uuid } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import express from "express";
 import serverless from "serverless-http";
 
@@ -10,34 +10,28 @@ const GAMESESSION_TABLE = process.env.GAMESESSION_TABLE;
 
 app.use(express.json());
 
-app.get("/sessions/:sessionId", async (request, response) => {
+app.get("/sessions", async (request, response) => {
   const params = {
-    TableName: GAMESESSION_TABLE,
-    Key: {
-      sessionId: request.params.sessionId,
-    },
+    TableName: GAMESESSION_TABLE
   };
 
   try {
-    const { Item } = await dynamoDbClient.get(params).promise();
-    if (Item) {
-      const { sessionId, hostname, players, gamemap, gamemode } = Item;
-      return response.json({ sessionId, hostname, players, gamemap, gamemode });
+    const result = await dynamoDbClient.scan(params).promise();
+    const Item = result.Items;
+
+    if (Item.length > 0) {
+      return response.json(Item)
     } else {
-      return response
-        .status(404)
-        .json({ error: 'Could not find user with provided "sessionId"' });
+      response.status(404).json({ error: 'No sessions found' });
     }
   } catch (error) {
     console.log(error);
-    return response
-      .status(500)
-      .json({ error: "Could not retrieve session" });
+    response.status(500).json({ error: "Could not retrieve session" });
   }
 });
 
 app.post("/sessions", async (request, response) => {
-  const sessionId = uuid.v4();
+  const sessionId = uuidv4();
   const { hostname, players, gamemap, gamemode } = request.body;
 
   const params = {
@@ -53,14 +47,10 @@ app.post("/sessions", async (request, response) => {
 
   try {
     await dynamoDbClient.put(params).promise();
-    return response
-      .status(201)
-      .json({ message: 'Game session created successfully'});
+    response.status(201).json({ message: 'Game session created successfully'});
   } catch (error) {
     console.log(error);
-    return response
-      .status(500)
-      .json({ error: 'Error creating game session', error });
+    response.status(500).json({ error: 'Error creating game session', error });
   }
 });
 

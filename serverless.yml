@@ -4,7 +4,7 @@ service: serverless-game-sessions-new
 frameworkVersion: "4"
 
 custom:
-  tableName: "sessions-table-${sls:stage}"
+  tableName: "GameSessionsTable-${sls:stage}"
 
 provider:
   name: aws
@@ -42,7 +42,7 @@ provider:
             - "*"
             - Fn::GetAtt: [GameSessionsTable, Arn]
   environment:
-    DYNAMODB_TABLE: ${self:custom.tableName}
+    GAMESESSION_TABLE: ${self:custom.tableName}
 
 functions:
   GameSession:

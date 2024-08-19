@@ -52,5 +52,9 @@ List Game Sessions: `GET /sessions`
 `Diretrizes de envio:`
 
 [x] Crie um repositório GitHub separado para o projeto de back-end.
+
 [ ] Inclua um README.md com instruções sobre como implantar e testar seu aplicativo.
+
 [ ] Forneça um NOTES.md detalhando sua abordagem, quaisquer suposições feitas e instruções sobre como executar seus testes de unidade.
+
+### Deploy and Test
