@@ -57,4 +57,74 @@ List Game Sessions: `GET /sessions`
 
 [ ] Forneça um NOTES.md detalhando sua abordagem, quaisquer suposições feitas e instruções sobre como executar seus testes de unidade.
 
-### Deploy and Test
+---
+
+### Deploy 
+
+[✔️] When downloading the repository, go to the install node_modules folder
+```
+npm install
+```
+[✔️] make sure serverless is installed on your machine globally 
+```
+npm i serverless -g
+```
+[✔️] Log in to serverless or, if necessary, create a new account 
+```
+serverless
+```
+[✔️] change the organization name in your serveless.yml file to the same as in your serverless profile
+```yml
+org: sua_organizacao_aqui
+app: challenge-fullstack
+service: serverless-game-sessions-new
+frameworkVersion: "4"
+```
+[✔️] Setting AWS credentials
+```
+serverless
+```
+  * Select: `Save AWS credentials in a local profile`
+
+    * Log into the AWS Account you want to use with Serverless Framework, 
+    * Navigate to the AWS IAM Dashboard,
+    * Navigate to the "Users" page - https://console.aws.amazon.com/iam/home?#/users 
+
+    * Click "Create User". 
+    * Enter a name (e.g. "serverless-framework"). 
+    * Don't check the box for "Access to the AWS Management Console". 
+    * Select "Attach Policies Directly". 
+    * Find and check the "AdministratorAccess" policy to attach it. 
+    * Create the IAM User.
+
+    * Open the newly created IAM User
+    * Click the "Security Credentials" tab. 
+    * Click "Create Access Key". 
+    * Select "Local Code". 
+    * Check the box to confirm you want to proceed creating an Access Key. 
+    * After creating the Access Key, copy the "Access Key" and "Secret Access Key" to enter below.
+
+* Enter your Access Key in the serverless terminal
+* Enter your Secret Access Key in the serverless terminal
+
+[✔️] Setting AWS credentials
+```
+serverless invoke local --function GameSession
+```
+
+Console response:
+```
+// there are no requests
+
+{
+    "statusCode": 404,
+    "headers": {
+        "x-powered-by": "Express",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "21",
+        "etag": "W/\"15-5KajTCx0AJD0xogoSeOjjV2M8K0\""
+    },
+    "isBase64Encoded": false,
+    "body": "{\"error\":\"Not Found\"}"
+}
+```
